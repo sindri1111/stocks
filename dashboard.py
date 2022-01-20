@@ -1,5 +1,4 @@
 import datetime
-
 import dash
 from dash import dcc
 from dash import html
@@ -12,8 +11,6 @@ from fileNames import HOLIDAYS
 from dashFunctions import getSymbol
 from dashSettings import *
 from dbFunctions import create_connection, execute_sql
-
-
 
 
 app = dash.Dash(__name__)
