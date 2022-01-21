@@ -71,6 +71,9 @@ def empty_table(tablename, conn=None, db_path=None):
         empty = True
     return empty
 
+def isInTable(conn, table, column, value):
+    isin = execute_sql(conn, """SELECT {column} FROM {table} WHERE {column}='{value}'""".format(column=column, value=value, table=table))
+    return len(isin.fetchall()) > 0
 
 #conn = create_connection("test.db")
 ##execute_sql(conn, create_table_command("Test", ["hi", "my", "name", "iiss"], ["text", "int", "float", "int"]))

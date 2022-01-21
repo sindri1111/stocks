@@ -12,5 +12,9 @@ graph_layout = {
     'paper_bgcolor': colors['background'],
     'xaxis':dict(type="category", showticklabels=False, gridcolor=colors['tickcolors']),
     'yaxis':dict(color=colors['tickcolors'], gridcolor=colors['tickcolors']),
-
+    'xaxis2':dict(type="category", showticklabels=False, gridcolor=colors['tickcolors'],
+                  showgrid=False),
+    'yaxis2':dict(color=colors['tickcolors'], gridcolor=colors['tickcolors'],
+                  showgrid=False),
+    'margin':{'t': 0,'l':0,'b':0,'r':10}
 }
