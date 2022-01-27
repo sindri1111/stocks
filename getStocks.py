@@ -16,7 +16,6 @@ def getStock(conn, symbol, time_start, time_end, interval="5m", save=False, skip
         if value[2] == "yfinance":
             stock = value[0]
             data = yf.download(stock, time_start, time_end, interval=interval)
-
             if not data.empty:
                 if save:
                     if stock not in TABLENAMES:
@@ -94,19 +93,52 @@ def updateStocksDataSingle(conn, symbol):
     end_date = datetime.datetime.today()
     getStock(conn, symbol, datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S"), end_date, save=True)
 
+def fixStockFailToday():
+    conn = create_connection(STOCKSDBPATH)
+    start_date = datetime.date.today() - timedelta(days=1)
+    end_date = datetime.date.today()
+    total = len(list(set([i[0] for i in execute_sql(conn, """SELECT DISTINCT Symbol FROM Tickers""").fetchall()])))
+    counter = 0
+    for symbol in list(set([i[0] for i in execute_sql(conn, """SELECT DISTINCT Symbol FROM Tickers""").fetchall()])):
+        try:
+            getStock(conn, symbol, start_date, end_date, save=True)
+        except:
+            pass
+        print("Fixing failed stocks: ", counter/total*100, "% Complete")
+        counter = counter + 1
+    conn.close()
+
 def updateStocksData():
     """Goes through all tables and gets the newest data, runs once a day"""
     conn = create_connection(STOCKSDBPATH)
+    total = len(list(set([i[0] for i in execute_sql(conn, """SELECT DISTINCT Symbol FROM Tickers""").fetchall()])))
+    counter = 0
     for symbol in list(set([i[0] for i in execute_sql(conn, """SELECT DISTINCT Symbol FROM Tickers""").fetchall()])):
         updateStocksDataSingle(conn, symbol)
+        print("Updating Stocks: ", counter / total * 100, "% Complete")
+        counter = counter + 1
     conn.close()
 
+def getOneDay(symbol, date):
+    """Gets the stock for one day of a symbol"""
+    conn = create_connection(STOCKSDBPATH)
+
+    data = execute_sql(conn,
+                       """SELECT * FROM "{symbol}" WHERE Datetime BETWEEN '{date} 00:00' AND '{date} 23:59'
+                       """.format(symbol=symbol, date=str(date))).fetchall()
+    conn.close()
+    return data
 
 def getStockLocal(conn, symbol, time_start, time_end):
     """Gets the stocks data from the database"""
     print("""SELECT * FROM {} WHERE Datetime BETWEEN '{}' AND '{}'""".format(symbol, time_start, time_end))
     return execute_sql(conn, """SELECT * FROM {} WHERE Datetime BETWEEN '{}' AND '{}'""".format(symbol, time_start, time_end)).fetchall()
 
+def getAllTableNames():
+    conn = create_connection(STOCKSDBPATH)
+    tablenames = get_table_names(conn)
+    conn.close()
+    return tablenames
 
 def download_one_at_a_time_WORKING():
     """Puts in CSV file - slow"""

@@ -12,17 +12,36 @@ def movingAverage(data, n):
         movingaverage[i-n+1] = sum(data[i-n+1:i+1])/n
     return movingaverage
 
-def exponentialMovingAverage(data, n, i=-1, smoothing=2):
+def movingAverage2(data, n):
+    movingaverage = [0 for i in range(len(data))]
+    for i in range(len(data)):
+        if i < n-1:
+            movingaverage[i] = sum(data[:i+1])/len(data[:i+1])
+        else:
+            movingaverage[i] = sum(data[i - n + 1:i + 1]) / n
+    return movingaverage
+
+
+def exponentialMovingAverageRecursion(data, n, i=-1, smoothing=2):
     if i == -1:
         # First time running
         i = len(data)-n
-    print(data[i:i + n])
     if i == 0:
         return sum(data[:n])/n
 
     return data[i+n-1]*(smoothing/(1+n)) + (1-(smoothing/(1+n)))*exponentialMovingAverage(data,n,i-1)
 
+def exponentialMovingAverage(data, n, smoothing=2):
+    ret = [0 for i in range(len(data)-n+1)]
+    ret[0] = sum(data[:n])/n
+    for i in range(1,len(ret)):
+        ret[i] = data[i+n-1]*(smoothing/(1+n)) + (1-(smoothing/(1+n)))*ret[i-1]
+    return ret
 
-
-print(exponentialMovingAverage([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], 5))
+def exponentialMovingAverage2(data, n, smoothing=2):
+    ret = [0 for i in range(len(data))]
+    ret[0] = data[0]
+    for i in range(1,len(ret)):
+        ret[i] = data[i]*(smoothing/(1+n)) + (1-(smoothing/(1+n)))*ret[i-1]
+    return ret
 
